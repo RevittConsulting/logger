@@ -25,7 +25,21 @@ go get github.com/RevittConsulting/logger
 
 - [x] Simple and easy to use
 - [x] Get observed logs for testing
+- [x] Loki support
 
+***
+
+## Loki Configuration
+
+Run this on app startup to enable loki logging.
+
+```go
+InitLoggerConfig(&Config{
+    LokiAddress: "http://localhost:3100",
+    Labels:      map[string]string{"app": "My App", "env": "local"},
+    UsingLoki:   true,
+})
+```
 ***
 
 ## Contributing

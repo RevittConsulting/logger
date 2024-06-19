@@ -1,9 +1,12 @@
 package logger
 
 import (
+	"context"
+	zaploki "github.com/paul-milne/zap-loki"
 	"go.uber.org/zap/zaptest/observer"
 	"os"
 	"sync"
+	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -35,14 +38,36 @@ func initLogger() {
 
 		obs, logs = observer.New(defaultLogLevel)
 
-		core := zapcore.NewTee(
+		cores := []zapcore.Core{
 			zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), defaultLogLevel),
 			obs,
-		)
+		}
+
+		if usingLoki {
+			cores = append(cores, initLokiLogger())
+		}
+
+		core := zapcore.NewTee(cores...)
 
 		log = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
 		instance = &Zaplog{log}
 	})
+}
+
+func initLokiLogger() zapcore.Core {
+	loki := zaploki.New(context.Background(), zaploki.Config{
+		Url:          lokiAddress,
+		BatchMaxSize: 1000,
+		BatchMaxWait: 10 * time.Second,
+		Labels:       labels,
+	})
+
+	lokiLogger, err := loki.WithCreateLogger(zap.NewProductionConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	return lokiLogger.Core()
 }
 
 // Log is invoking Zap Logger function
