@@ -42,6 +42,20 @@ InitLoggerConfig(&Config{
 ```
 ***
 
+## Log to file
+
+Add these values to config
+
+```go
+loggerCfg := &logger.Config{
+    LogToFile:   true,
+    LogFilePath: "log.txt",
+}
+logger.InitLoggerConfig(loggerCfg)
+```
+
+***
+
 ## Contributing
 
 Found a bug or want to suggest a feature? Feel free to create an issue or make a pull request.
