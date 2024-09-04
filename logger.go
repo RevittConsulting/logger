@@ -47,6 +47,10 @@ func initLogger() {
 			cores = append(cores, initLokiLogger())
 		}
 
+		if logToFile {
+			cores = append(cores, initFileLogger(logFilePath, defaultLogLevel, config))
+		}
+
 		core := zapcore.NewTee(cores...)
 
 		log = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
@@ -68,6 +72,19 @@ func initLokiLogger() zapcore.Core {
 	}
 
 	return lokiLogger.Core()
+}
+
+func initFileLogger(filePath string, level zapcore.Level, encoderConfig zapcore.EncoderConfig) zapcore.Core {
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	fileSync := zapcore.AddSync(file)
+
+	fileEncoder := zapcore.NewConsoleEncoder(encoderConfig)
+
+	return zapcore.NewCore(fileEncoder, fileSync, level)
 }
 
 // Log is invoking Zap Logger function
