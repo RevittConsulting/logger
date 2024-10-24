@@ -123,6 +123,20 @@ func (z *Zaplog) PanicErr(e error, fields ...zapcore.Field) *Zaplog {
 	return z
 }
 
+// ErrorAlert is invoking Zap Logger function with error message and fields and log level Error
+func (z *Zaplog) ErrorAlert(e error, fields ...zapcore.Field) *Zaplog {
+	fieldsWithAlert := append(fields, zap.Bool("alert", true))
+	z.Logger.Error(e.Error(), fieldsWithAlert...)
+	return z
+}
+
+// WarnAlert is invoking Zap Logger function with error message and fields and log level Warn
+func (z *Zaplog) WarnAlert(e error, fields ...zapcore.Field) *Zaplog {
+	fieldsWithAlert := append(fields, zap.Bool("alert", true))
+	z.Logger.Warn(e.Error(), fieldsWithAlert...)
+	return z
+}
+
 // GetObservedLogs returns observed logs for testing purposes
 func GetObservedLogs() *observer.ObservedLogs {
 	initLogger()
